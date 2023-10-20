@@ -11,7 +11,7 @@ void trackStatus();
 void writeToTxt();
 void printResult(vector<Task> &result);
 void addTask(int priority, string title, int status,Date scheduled_time, Date deadline, string note);
-void findTask(vector<Task> &result, int priority, int status, Date deadline);
+void filterWith3Conditions(vector<Task> &result, int priority, int status, Date deadline);
 void filterByPriority(vector<Task> &result, int priority);
 void filterByStatus(vector<Task> &result, int status);
 void filterByDeadline(vector<Task> &result, Date deadline);
@@ -23,7 +23,7 @@ void typeInTask();
 void selectTask();
 void deleteTask(Task temp);
 void editTask(Task &temp);
-
+void findTask();
 void perform(int k);
 
 int main() {
@@ -151,6 +151,9 @@ void perform(int k) {
     case 4:
         writeToTxt();
         break;
+    case 5:
+        findTask();
+        break;
     default:
         break;
     }
@@ -168,17 +171,15 @@ void updateCurrentTasks() {
 }
 
 void trackStatus() {
-    int k = 19;
-    while (k != 0) {
-        system("cls");
-        for (int i = 0; i < 5; ++i) {
-            cout << strStatus[i] << ": " << statistics[i] << "\n";
-            // strStatus la dang string cua cac status
-        }
-        cout << '\n';
-        cout << "Press 0 to exit... "; cin >> k;
+    string temp;
+    system("cls");
+    for (int i = 0; i < 5; ++i) {
+        cout << strStatus[i] << ": " << statistics[i] << "\n";
+        // strStatus la dang string cua cac status
     }
-    
+    cout << '\n';
+    cout << "Press Enter to exit... "; 
+    cin.ignore(); getline(cin, temp);
 }
 
 void clearOutputFile() {
@@ -369,8 +370,63 @@ void printResult(vector<Task> &result) {
         x.print();
 }
 
+void findTask() {
+    system("cls");
+    string title, scheduled_time, deadline = "01/01/0001", note;
+    int status, priority;
+    cin.ignore();
+    cout << "Title: "; getline(cin, title);
+    cout << "Status (0-not_completed  1-in_progress 2-completed 3-cancelled 4-overdue): "; cin >> status;
+    cout << "Priority (0-in_a_day 1-in_three_days 2-in_a_week 3-in_two_weeks 4-in_a_month): "; cin >> priority;
+    cout << "Scheduled_time (DD/MM/YYYY): "; cin >> scheduled_time;
+    while (!(Date(deadline)).isValid(scheduled_time)) {
+        cout << "Deadline (must be equal to or after scheduling): "; cin >> deadline; 
+    }
+    cout << "Note: "; cin.ignore(); getline(cin, note);
+    Task temp = Task(Status(status), title, Priority(priority), Date(scheduled_time), Date(deadline), note);
+    bool existence = false;
+    for (auto x : a[priority][status][temp.getDeadline().day][temp.getDeadline().month])
+        if (x.compare(temp)) {
+            existence = true;
+            break;
+        } 
+    if (!existence)
+    {
+        cout << "\nDoes not exist!\n";
+        cout << "Press Enter to exit...";
+        getline(cin, title);
+    }  
+    else
+    {
+        int k = 3;
+        while (k > 0) {
+            system("cls");
+            temp.print();
+            cout << "1. Edit task\n"
+                << "2. Delete task\n"
+                << "0. Exit\n";
+            cout << "Selection: "; cin >> k;
+            switch (k)
+            {
+            case 1:
+                editTask(temp);
+                break;
+            case 2:
+                deleteTask(temp);
+                k = 0;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    
+    
+}
+
 // truoc khi dung phai result.clear()
-void findTask(vector<Task> &result, int priority, int status, Date deadline) {
+void filterWith3Conditions(vector<Task> &result, int priority, int status, Date deadline) {
     int l = 0, r = a[priority][status][deadline.day][deadline.month].size()-1, mid, best = a[priority][status][deadline.day][deadline.month].size() - 1;
     while (l <= r) {
         mid = (l + r) / 2;
@@ -414,7 +470,7 @@ void filterByDeadline(vector<Task> &result, Date deadline) {
     for (int priority = 0; priority < 5; ++priority)
         for (int status = 0; status < 5; ++status)
             if (a[priority][status][deadline.day][deadline.month].size() > 0)
-                findTask(result, priority, status, deadline);
+                filterWith3Conditions(result, priority, status, deadline);
 }
 
 vector<Task> filterByPriority2(vector<Task> &result, Priority priority) {
