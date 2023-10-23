@@ -15,12 +15,14 @@ void filterWith3Conditions( int priority, int status, Date deadline);
 void filterByPriority( int priority);
 void filterByStatus(int status);
 void filterByDeadline(Date deadline);
-vector<Task> filterByDeadline2(vector<Task> & result, Date deadline);
-vector<Task> filterByStatus2(vector<Task> &result, Status status);
-vector<Task> filterByPriority2(vector<Task> &result, Priority priority);
+void filterByDeadline2( Date deadline);
+void filterByStatus2( Status status);
+void filterByPriority2( Priority priority);
+void filterByTitle(string title);
 void updateCurrentTasks();
 void typeInTask();
 void selectTask();
+void selectTask2(string title, int status, int priority, string deadline);
 void deleteTask(Task temp);
 void editTask(Task &temp);
 void findTask();
@@ -48,37 +50,6 @@ int main() {
     }
     inp.close();
 
-    
-
-    // find Task by priority, status, deadline
-    
-    vector<Task> result2;
-
-    // result.clear();
-    // findTask(result, 4, 3, Date("16/10/2023"));         // truoc khi dung phai result.clear();
-    // printResult(result);
-    // cout << "---------------\n";
-    // filterByStatus(result, overdue);
-    // printResult(result);
-
-    // inputTask();
-
-    // // ham deleteTask can dua vao Task cu the
-    // deleteTask(Task(Status(1), "Tieu de 2", Priority(1), Date("09/11/2023"), Date("16/10/2023"), "ghi chu thu 2"));
-
-    // // ham editTask can dua vao Task cu the
-    // editTask(Task(Status(3), "Tieu de 1", Priority(4), Date("09/10/2023"), Date("16/10/2023"), "ghi chu thu 1"));
-
-    // cout << "-------------------\n";
-    // filterByDeadline(result, Date("16/10/2023"));
-    // printResult(result);
-    // cout << "---------------------\n";
-    // result2 = filterByStatus2(result, Status(2));
-    // for (auto x : result2)
-    //     x.print();
-
-    // menuuuu
-    // thêm, (xoá, sửa), 
     int k = 10;
     updateCurrentTasks();
     while (k > 0) {
@@ -432,6 +403,7 @@ void filter() {
     int k = 10, status = 5, priority = 5;
     string deadline = "N/A", title = "N/A";
     bool first = true;
+
     while (k > 0) {
         system("cls");
         // Filters that are being applied
@@ -496,7 +468,7 @@ void filter() {
         }
         cout << "|--------------------------------------------------------------------------------------------------------------------------------------------|\n\n";
         
-        
+        if (first) {
             cout << "1. Filter by status\n"
                  << "2. Filter by priority\n"
                  << "3. Filter by deadline\n"
@@ -521,12 +493,60 @@ void filter() {
                 filterByDeadline(Date(deadline));
                 break;
             case 4: 
-                selectTask();
+                selectTask2(title, status, priority, deadline);
                 break;
             default:
                 break;
             }
-        
+        }
+        else {
+            cout << "1. Add filter by status\n"
+                 << "2. Add filter by priority\n"
+                 << "3. Add filter by deadline\n"
+                 << "4. Add filter by title\n"
+                 << "5. Select task\n"
+                 << "0. Exit (clear all filters and exit) \n";
+            cout << "Selection: "; cin >> k;
+            switch (k)
+            {
+            case 1:
+                if (status == 5) {
+                    cout << "\nStatus (0-not_completed  1-in_progress 2-completed 3-cancelled 4-overdue): "; cin >> status;
+                    filterByStatus2(Status(status));
+                }
+                break;
+            case 2:
+                if (priority == 5) {
+                    cout << "Priority (0-in_a_day 1-in_three_days 2-in_a_week 3-in_two_weeks 4-in_a_month): "; cin >> priority;
+                    filterByPriority2(Priority(priority));
+                }
+                break;
+            case 3:
+                if (deadline == "N/A") {
+                    cout << "Deadline (DD/MM/YYYY): "; cin >> deadline;
+                    filterByDeadline2(Date(deadline));
+                }
+                break;
+            case 4: 
+                if (title == "N/A") {
+                    cout << "Title: "; cin.ignore(); getline(cin, title);
+                    filterByTitle(title);
+                }
+                break;
+            case 5:
+                selectTask2(title, status, priority, deadline);
+                break;
+            case 0:
+                first = true;
+                currentTasks.clear();
+                status = priority = 5;
+                deadline = title = "N/A";
+                k = 10;                             // to return the screen displaying the first filter;
+                break;
+            default:
+                break;
+            }
+        }
         
     }
 }
@@ -579,27 +599,92 @@ void filterByDeadline( Date deadline) {
                 filterWith3Conditions( priority, status, deadline);
 }
 
-vector<Task> filterByPriority2(vector<Task> &result, Priority priority) {
+void filterByPriority2(Priority priority) {
     vector<Task> temp;
-    for (auto x : result) {
+    for (auto x : currentTasks) {
         if (x.getPriority() == priority) temp.push_back(x);
     }
-    return temp;
+    currentTasks.clear();
+    currentTasks = temp;
 }
 
-vector<Task> filterByStatus2(vector<Task> &result, Status status) {
+void filterByStatus2( Status status) {
     vector<Task> temp;
-    for (auto x : result) {
+    for (auto x : currentTasks) {
         if (x.getStatus() == status) temp.push_back(x);
     }
-    return temp;
+    currentTasks.clear();
+    currentTasks = temp;
 }
 
-vector<Task> filterByDeadline2(vector<Task> & result, Date deadline) {
+void filterByDeadline2( Date deadline) {
     vector <Task> temp;
-    for (auto x : result) {
+    for (auto x : currentTasks) {
         if (x.getDeadline().getDate() == deadline.getDate()) temp.push_back(x);
     }
-    return temp;
+    currentTasks.clear();
+    currentTasks = temp;
 }
 
+void selectTask2(string title, int status, int priority, string deadline) {
+    int x;
+    cout << "Which task do you choose? (0 1 2 3 ...): "; cin >> x;
+    cout << "\n";
+    int k = 3;
+    bool check = false;
+    Task temp = currentTasks[x];
+    while (k > 0) {
+        system("cls");
+        currentTasks[x].print();
+        cout << "1. Edit task\n"
+             << "2. Delete task\n"
+             << "0. Exit\n";
+        cout << "Selection: "; cin >> k;
+        switch (k)
+        {
+        case 1:
+            editTask(currentTasks[x]);
+            check = true;
+            break;
+        case 2:
+            deleteTask(currentTasks[x]);
+            currentTasks.erase(currentTasks.begin() + x);
+            k = 0;
+            break;
+        default:
+            break;
+        }
+    }
+    if (check)
+    {
+        if (title != "N/A")
+            if (currentTasks[x].getTitle().find(title) == -1) {
+                currentTasks.erase(currentTasks.begin() + x);
+                return;
+            }
+        if (status != 5) 
+            if (currentTasks[x].getStatus() != status) {
+                currentTasks.erase(currentTasks.begin() + x);
+                return;
+            }
+        if (priority != 5)
+            if (currentTasks[x].getPriority() != priority) {
+                currentTasks.erase(currentTasks.begin() + x);
+                return;
+            }
+        if (deadline != "N/A")
+            if (currentTasks[x].getDeadline().getDate() != deadline) {
+                currentTasks.erase(currentTasks.begin() + x);
+                return;
+            }
+    }
+}
+
+void filterByTitle(string title) {
+    vector <Task> temp;
+    for (auto x : currentTasks) {
+        if (x.getTitle().find(title) != -1) temp.push_back(x);
+    }
+    currentTasks.clear();
+    currentTasks = temp;
+}
