@@ -5,16 +5,16 @@
 
 int statistics[5] = {0};                    // count the number of each status
 vector<Task> a[5][5][32][13];               // a[priority][status][day][month][year]
-vector<Task> currentTasks;
+vector<Task> currentTasks;                  // to display tasks on the screen
 
 void trackStatus();
 void writeToTxt();
 void printResult(vector<Task> &result);
 void addTask(int priority, string title, int status,Date scheduled_time, Date deadline, string note);
-void filterWith3Conditions(vector<Task> &result, int priority, int status, Date deadline);
-void filterByPriority(vector<Task> &result, int priority);
-void filterByStatus(vector<Task> &result, int status);
-void filterByDeadline(vector<Task> &result, Date deadline);
+void filterWith3Conditions( int priority, int status, Date deadline);
+void filterByPriority( int priority);
+void filterByStatus(int status);
+void filterByDeadline(Date deadline);
 vector<Task> filterByDeadline2(vector<Task> & result, Date deadline);
 vector<Task> filterByStatus2(vector<Task> &result, Status status);
 vector<Task> filterByPriority2(vector<Task> &result, Priority priority);
@@ -24,6 +24,7 @@ void selectTask();
 void deleteTask(Task temp);
 void editTask(Task &temp);
 void findTask();
+void filter();
 void perform(int k);
 
 int main() {
@@ -124,7 +125,7 @@ int main() {
              << "2. Select Task (to view, edit, delete)\n"
              << "3. Track Status\n"
              << "4. Write all tasks to the output.txt file\n"       
-             << "5. Find task\n"            // to do
+             << "5. Find task\n"            
              << "6. Filter\n"               // to do
              << "0. Exit\n";
         // The tasks are always sorted based on their priority, so I don't need to create a function for sorting anymore
@@ -153,6 +154,9 @@ void perform(int k) {
         break;
     case 5:
         findTask();
+        break;
+    case 6:
+        filter();
         break;
     default:
         break;
@@ -245,6 +249,7 @@ void selectTask() {
             break;
         case 2:
             deleteTask(currentTasks[x]);
+            currentTasks.erase(currentTasks.begin() + x);
             k = 0;
             break;
         default:
@@ -293,7 +298,7 @@ void editTask(Task &temp) {
         switch (k)
         {
         case 1:
-            cin.ignore(255, '\n');
+            cin.ignore(265, '\n');
             cout << "Title: "; getline(cin, s);
             a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month][i].setTitle(s);
             temp.setTitle(s);           // update to show the current task 
@@ -332,7 +337,7 @@ void editTask(Task &temp) {
             break;
         case 6:
             cout << "Note: ";  
-            cin.ignore(255, '\n');
+            cin.ignore(265, '\n');
             getline(cin, s);
             a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month][i].setNote(s);
             temp.setNote(s);
@@ -419,14 +424,115 @@ void findTask() {
                 break;
             }
         }
-    }
+    }    
+}
 
-    
-    
+void filter() {
+    currentTasks.clear();
+    int k = 10, status = 5, priority = 5;
+    string deadline = "N/A", title = "N/A";
+    bool first = true;
+    while (k > 0) {
+        system("cls");
+        // Filters that are being applied
+        cout << "___________________________________________________________________________________" << endl;
+        cout
+             << setw(8) << "| Status" 
+             << setw(16) << "| Title" 
+             << setw(37) << "| Priority" 
+             << setw(23) << "| Deadline    |\n" ;
+        cout << "|----------------|---------------------------------|----------------|-------------|" << endl;
+        int tempSize = title.size();
+            cout 
+             << "| " << setw(strStatus[status].size()) << strStatus[status]
+             << setw(4 + (13 - strStatus[status].size())) << "| " ;
+            
+            if (tempSize > 30) {
+                
+                for (int chr = 0; chr < 27; ++chr) cout << title[chr];
+                cout << "...";
+                tempSize = 30;
+            }
+            else cout << setw(title.size()) << title;
+             cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[priority].size()) << strPriority[priority]
+             << setw(4 + (13 - strPriority[priority].size())) << "| " << setw(10) << deadline 
+             << setw(5) << "| \n" ;
+        cout << "|---------------------------------------------------------------------------------|\n" << endl;
+
+        // Tasks after applying filters
+        cout << "______________________________________________________________________________________________________________________________________________" << endl;
+        cout << setw(4) << "| No. " 
+             << setw(9) << "| Status" 
+             << setw(16) << "| Title" 
+             << setw(37) << "| Priority" 
+             << setw(23) << "| Scheduled_time" 
+             << setw(12) << "| Deadline" 
+             << setw(10) << "| Note" << setw(30) << "|\n";
+        cout << "|------|----------------|---------------------------------|----------------|-----------------|-------------|---------------------------------|" << endl;
+        for (int i = 0; i < currentTasks.size(); ++i) {
+            tempSize = currentTasks[i].getTitle().size();
+            cout << "| "<< i 
+             << setw(4 + (3 - to_string(i).size())) << "| " << setw(strStatus[currentTasks[i].getStatus()].size()) << strStatus[currentTasks[i].getStatus()]
+             << setw(4 + (13 - strStatus[currentTasks[i].getStatus()].size())) << "| " ;
+            
+            if (tempSize > 30) {
+                
+                for (int chr = 0; chr < 27; ++chr) cout << currentTasks[i].getTitle()[chr];
+                cout << "...";
+                tempSize = 30;
+            }
+            else cout << setw(currentTasks[i].getTitle().size()) << currentTasks[i].getTitle();
+             cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[currentTasks[i].getPriority()].size()) << strPriority[currentTasks[i].getPriority()]
+             << setw(4 + (13 - strPriority[currentTasks[i].getPriority()].size())) << "| " << setw(10) << currentTasks[i].getScheduledTime().getDate() 
+             << setw(8) << "| " << setw(10) << currentTasks[i].getDeadline().getDate()
+             << setw(4) << "| ";
+            tempSize = currentTasks[i].getNote().size();
+            if (tempSize > 30) {
+                for (int chr = 0; chr < 28; ++chr) cout << currentTasks[i].getNote()[chr]; cout << "... |\n";
+                
+            }
+            else
+            cout << setw(currentTasks[i].getNote().size()) << currentTasks[i].getNote() << setw(4 + 30 - currentTasks[i].getNote().size()) << "|\n";
+        }
+        cout << "|--------------------------------------------------------------------------------------------------------------------------------------------|\n\n";
+        
+        
+            cout << "1. Filter by status\n"
+                 << "2. Filter by priority\n"
+                 << "3. Filter by deadline\n"
+                 << "4. Select Task\n"
+                 << "0. Exit\n";
+            cout << "Selection: "; cin >> k;
+            switch (k)
+            {
+            case 1:
+                first = false;
+                cout << "\nStatus (0-not_completed  1-in_progress 2-completed 3-cancelled 4-overdue): "; cin >> status;
+                filterByStatus(status);
+                break;
+            case 2:
+                first = false;
+                cout << "Priority (0-in_a_day 1-in_three_days 2-in_a_week 3-in_two_weeks 4-in_a_month): "; cin >> priority;
+                filterByPriority(priority);
+                break;
+            case 3:
+                first = false;
+                cout << "Deadline: "; cin >> deadline;
+                filterByDeadline(Date(deadline));
+                break;
+            case 4: 
+                selectTask();
+                break;
+            default:
+                break;
+            }
+        
+        
+    }
 }
 
 // truoc khi dung phai result.clear()
-void filterWith3Conditions(vector<Task> &result, int priority, int status, Date deadline) {
+void filterWith3Conditions(int priority, int status, Date deadline) {
     int l = 0, r = a[priority][status][deadline.day][deadline.month].size()-1, mid, best = a[priority][status][deadline.day][deadline.month].size() - 1;
     while (l <= r) {
         mid = (l + r) / 2;
@@ -439,38 +545,38 @@ void filterWith3Conditions(vector<Task> &result, int priority, int status, Date 
         else l = mid + 1;
     }
     while (a[priority][status][deadline.day][deadline.month][best].getDeadline().year == deadline.year && best < a[priority][status][deadline.day][deadline.month].size()) {
-        result.push_back(a[priority][status][deadline.day][deadline.month][best]);
+        currentTasks.push_back(a[priority][status][deadline.day][deadline.month][best]);
         ++best;
     }
 }
 
-void filterByPriority(vector<Task> &result, int priority) {
-    result.clear();
+void filterByPriority( int priority) {
+    currentTasks.clear();
     for (int status = 0; status < 5; ++status)
         for (int day = 1; day < 32; ++day)
             for (int month = 1; month < 13; ++month)
                 if (a[priority][status][day][month].size() > 0) {
                     for (auto x : a[priority][status][day][month])
-                        result.push_back(x);
+                        currentTasks.push_back(x);
                 }
 }
 
-void filterByStatus(vector<Task> &result, int status) {
-    result.clear();
+void filterByStatus( int status) {
+    currentTasks.clear();
     for (int priority = 0; priority < 5; ++priority) 
         for (int day = 1; day < 32; ++day)
             for (int month = 1; month < 13; ++month)
                 if (a[priority][status][day][month].size() > 0)
                     for (auto x : a[priority][status][day][month])
-                        result.push_back(x);
+                        currentTasks.push_back(x);
 }
 
-void filterByDeadline(vector<Task> &result, Date deadline) {
-    result.clear();
+void filterByDeadline( Date deadline) {
+    currentTasks.clear();
     for (int priority = 0; priority < 5; ++priority)
         for (int status = 0; status < 5; ++status)
             if (a[priority][status][deadline.day][deadline.month].size() > 0)
-                filterWith3Conditions(result, priority, status, deadline);
+                filterWith3Conditions( priority, status, deadline);
 }
 
 vector<Task> filterByPriority2(vector<Task> &result, Priority priority) {
@@ -496,3 +602,4 @@ vector<Task> filterByDeadline2(vector<Task> & result, Date deadline) {
     }
     return temp;
 }
+
