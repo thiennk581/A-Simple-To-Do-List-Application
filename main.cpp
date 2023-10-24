@@ -1,3 +1,4 @@
+// Usage: open file main.exe and maximize
 // The tasks are always sorted based on their priority, so I don't need to create a function for sorting anymore
 
 #include "main.h"

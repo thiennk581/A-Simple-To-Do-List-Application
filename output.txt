@@ -1,0 +1,77 @@
+Task 1: 
+Title:    Watch lecture video
+Status:   completed
+Priority: in_a_day
+Deadline: 23/09/2023 -- 24/09/2023
+Note:     Take notes on the key concepts
+
+Task 2: 
+Title:    Running
+Status:   cancelled
+Priority: in_a_day
+Deadline: 21/10/2023 -- 21/10/2023
+Note:     Bad weather
+
+Task 3: 
+Title:    Buy groceries
+Status:   not_completed
+Priority: in_three_days
+Deadline: 25/10/2023 -- 28/10/2023
+Note:     Remember to buy milk and bread
+
+Task 4: 
+Title:    Read chapter 4
+Status:   in_progress
+Priority: in_three_days
+Deadline: 23/10/2023 -- 25/10/2023
+Note:     Read the rest
+
+Task 5: 
+Title:    Read chapter 3
+Status:   completed
+Priority: in_three_days
+Deadline: 20/10/2023 -- 23/10/2023
+Note:     Understand the complexity of the algorithm
+
+Task 6: 
+Title:    Complete math homework
+Status:   overdue
+Priority: in_three_days
+Deadline: 14/10/2023 -- 16/10/2023
+Note:     Questions 1-10
+
+Task 7: 
+Title:    Read chapter 5
+Status:   not_completed
+Priority: in_a_week
+Deadline: 24/10/2023 -- 31/10/2023
+Note:     Focus on the section about algorithms
+
+Task 8: 
+Title:    Build a presentation script
+Status:   in_progress
+Priority: in_a_week
+Deadline: 22/10/2023 -- 29/10/2023
+Note:     The Marxist-Leninist viewpoint on socialism
+
+Task 9: 
+Title:    Design a ppt presentation
+Status:   completed
+Priority: in_two_weeks
+Deadline: 08/10/2023 -- 21/10/2023
+Note:     The Marxist-Leninist viewpoint on socialism
+
+Task 10: 
+Title:    Attend group study session
+Status:   cancelled
+Priority: in_two_weeks
+Deadline: 30/10/2023 -- 13/11/2023
+Note:     Reschedule for next week
+
+Task 11: 
+Title:    A Simple To Do List Application
+Status:   completed
+Priority: in_a_month
+Deadline: 09/10/2023 -- 05/11/2023
+Note:     The task management app allows users to add, search, statistics and sort tasks by status, priority level, scheduled time and deadline. It has filtering functions and can export tasks to a text file
+
