@@ -3,6 +3,7 @@
 
 string strStatus[] = {"not_completed", "in_progress", "completed", "cancelled", "overdue", "N/A"};
 string strPriority[] = {"in_a_day", "in_three_days", "in_a_week",  "in_two_weeks", "in_a_month", "N/A"};
+// strStatus is a string representation of the statuses for easy display.
 
 enum Status {
     not_completed,

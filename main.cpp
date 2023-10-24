@@ -7,10 +7,8 @@ int statistics[5] = {0};                    // count the number of each status
 vector<Task> a[5][5][32][13];               // a[priority][status][day][month][year]
 vector<Task> currentTasks;                  // to display tasks on the screen
 
-void trackStatus();
-void writeToTxt();
 void printResult(vector<Task> &result);
-void addTask(int priority, string title, int status,Date scheduled_time, Date deadline, string note);
+void selectTask2(string title, int status, int priority, string deadline);
 void filterWith3Conditions( int priority, int status, Date deadline);
 void filterByPriority( int priority);
 void filterByStatus(int status);
@@ -21,23 +19,27 @@ void filterByPriority2( Priority priority);
 void filterByTitle(string title);
 void updateCurrentTasks();
 void typeInTask();
+void writeToTxt_Filter();
+
+void addTask(int priority, string title, int status,Date scheduled_time, Date deadline, string note);
 void selectTask();
-void selectTask2(string title, int status, int priority, string deadline);
 void deleteTask(Task temp);
 void editTask(Task &temp);
+void trackStatus();
+void writeToTxt();
 void findTask();
 void filter();
 void perform(int k);
 
 int main() {
     ifstream inp("input.txt");
-    
-             
+                 
     int status, priority;
     string temp, title, note;
     Date scheduled_time, deadline;
-    for (int i = 0 ; i < 8; ++i) {
+    while (!inp.eof()) {
         getline(inp, temp, ';'); status = toInt(temp);
+        if (temp == "") break;
         getline(inp, title, ';');
         getline(inp, temp, ';'); priority = toInt(temp);
         getline(inp, temp, ';'); scheduled_time.setDate(temp);
@@ -88,23 +90,21 @@ int main() {
             }
             else
             cout << setw(currentTasks[i].getNote().size()) << currentTasks[i].getNote() << setw(4 + 30 - currentTasks[i].getNote().size()) << "|\n";
-        }
-        
-        
+        }    
         cout << "|--------------------------------------------------------------------------------------------------------------------------------------------|\n";
+        
         cout << "\n1. Add Task\n"
              << "2. Select Task (to view, edit, delete)\n"
              << "3. Track Status\n"
              << "4. Write all tasks to the output.txt file\n"       
              << "5. Find task\n"            
-             << "6. Filter\n"               // to do
+             << "6. Filter\n"             
              << "0. Exit\n";
         // The tasks are always sorted based on their priority, so I don't need to create a function for sorting anymore
         cout << "Selection: "; cin >> k;
         perform(k);
         updateCurrentTasks();
     }
-
 }
 
 void perform(int k) {
@@ -145,12 +145,12 @@ void updateCurrentTasks() {
                             currentTasks.emplace_back(x);
 }
 
+// Statistics are updated in the delete, add, edit functions.
 void trackStatus() {
     string temp;
     system("cls");
     for (int i = 0; i < 5; ++i) {
-        cout << strStatus[i] << ": " << statistics[i] << "\n";
-        // strStatus la dang string cua cac status
+        cout << strStatus[i] << ": " << statistics[i] << "\n";        
     }
     cout << '\n';
     cout << "Press Enter to exit... "; 
@@ -183,6 +183,22 @@ void writeToTxt() {
     out.close();
 }
 
+void writeToTxt_Filter() {
+    clearOutputFile();
+    int count = 0;
+    ofstream out("output.txt", std::ios::app);
+    for (auto x : currentTasks)
+    {
+        out << "Task " << ++count << ": \n";
+        out << "Title:    " << x.getTitle() << "\n";
+        out << "Status:   " << strStatus[x.getStatus()] << "\n";
+        out << "Priority: " << strPriority[x.getPriority()] << "\n";
+        out << "Deadline: " << x.getScheduledTime().getDate() << " -- " << x.getDeadline().getDate() << "\n";
+        out << "Note:     " << x.getNote() << "\n\n";
+    }
+    out.close();
+}
+
 void typeInTask() {
     bool validDeadline = false;
     string title, temp, note;
@@ -201,6 +217,7 @@ void typeInTask() {
     addTask(priority, title, status, scheduled_time, deadline, note);
 }
 
+// Select a task in currentTasks (on screen)
 void selectTask() {
     int x;
     cout << "Which task do you choose? (0 1 2 3 ...): "; cin >> x;
@@ -230,7 +247,7 @@ void selectTask() {
 }
 
 void deleteTask(Task temp) {
-    int i = 0;          // vi tri cua temp trong a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month]
+    int i = 0;          // the index of temp in a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month]
     for (i; i < a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month].size(); ++i)
         if (a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month][i].getTitle() == temp.getTitle()
             && a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month][i].getNote() == temp.getNote())
@@ -242,11 +259,10 @@ void deleteTask(Task temp) {
 } 
 
 void editTask(Task &temp) {
-    int i = 0;          // vi tri cua temp trong a[temp.getPriority()][temp.getStatus()][temp.getDeadline().day][temp.getDeadline().month]
-    
-    int k = -1;
+    int i = 0;          
+    int k = -1;     // selection
     string s;
-    bool validDeadline = false;
+    bool validDeadline = false;    
     Date deadlineTemp, scheduled_time;
     while (k != 0) {
         system("cls");
@@ -295,7 +311,7 @@ void editTask(Task &temp) {
             if (temp.getDeadline().isValid(temp.getScheduledTime()))
                 break;  // if scheduled_time entered is not valid then edit the deadline
             else cout << "Because the scheduled_time has been changed, you need to adjust the deadline: \n";
-        case 5: // to do
+        case 5: 
             scheduled_time = temp.getScheduledTime();
             while (!validDeadline) {
                 cout << "Deadline (must be equal to or after scheduling): "; cin >> s; deadlineTemp.setDate(s);
@@ -327,17 +343,18 @@ void addTask( int priority, string title, int status,Date scheduled_time, Date d
             {
                 if (deadline.year <= a[priority][status][deadline.day][deadline.month][mid].getDeadline().year && deadline.year >= a[priority][status][deadline.day][deadline.month][mid-1].getDeadline().year) break;
             }
-            else if (deadline.year <= a[priority][status][deadline.day][deadline.month][mid].getDeadline().year) break;
-            
+            else 
+                if (deadline.year <= a[priority][status][deadline.day][deadline.month][mid].getDeadline().year) break;
             if (deadline.year >= a[priority][status][deadline.day][deadline.month][mid].getDeadline().year) l = mid+1;
-            else r = mid-1;
+            else 
+                r = mid-1;
         }
         if (l > r)
             a[priority][status][deadline.day][deadline.month].emplace_back(Status(status), title, Priority(priority), scheduled_time, deadline, note);
         else
-        if (mid == 0)   a[priority][status][deadline.day][deadline.month].insert(a[priority][status][deadline.day][deadline.month].begin(), Task(Status(status), title, Priority(priority), scheduled_time, deadline, note));
+            if (mid == 0) a[priority][status][deadline.day][deadline.month].insert(a[priority][status][deadline.day][deadline.month].begin(), Task(Status(status), title, Priority(priority), scheduled_time, deadline, note));
         else
-        a[priority][status][deadline.day][deadline.month].insert(a[priority][status][deadline.day][deadline.month].begin() + mid , Task(Status(status), title, Priority(priority), scheduled_time, deadline, note));
+            a[priority][status][deadline.day][deadline.month].insert(a[priority][status][deadline.day][deadline.month].begin() + mid , Task(Status(status), title, Priority(priority), scheduled_time, deadline, note));
         ++statistics[status];   
 }
 
@@ -379,8 +396,8 @@ void findTask() {
             system("cls");
             temp.print();
             cout << "1. Edit task\n"
-                << "2. Delete task\n"
-                << "0. Exit\n";
+                 << "2. Delete task\n"
+                 << "0. Exit\n";
             cout << "Selection: "; cin >> k;
             switch (k)
             {
@@ -415,18 +432,16 @@ void filter() {
              << setw(23) << "| Deadline    |\n" ;
         cout << "|----------------|---------------------------------|----------------|-------------|" << endl;
         int tempSize = title.size();
-            cout 
-             << "| " << setw(strStatus[status].size()) << strStatus[status]
+        cout << "| " << setw(strStatus[status].size()) << strStatus[status]
              << setw(4 + (13 - strStatus[status].size())) << "| " ;
             
-            if (tempSize > 30) {
-                
+            if (tempSize > 30) {   
                 for (int chr = 0; chr < 27; ++chr) cout << title[chr];
                 cout << "...";
                 tempSize = 30;
             }
             else cout << setw(title.size()) << title;
-             cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[priority].size()) << strPriority[priority]
+            cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[priority].size()) << strPriority[priority]
              << setw(4 + (13 - strPriority[priority].size())) << "| " << setw(10) << deadline 
              << setw(5) << "| \n" ;
         cout << "|---------------------------------------------------------------------------------|\n" << endl;
@@ -447,21 +462,19 @@ void filter() {
              << setw(4 + (3 - to_string(i).size())) << "| " << setw(strStatus[currentTasks[i].getStatus()].size()) << strStatus[currentTasks[i].getStatus()]
              << setw(4 + (13 - strStatus[currentTasks[i].getStatus()].size())) << "| " ;
             
-            if (tempSize > 30) {
-                
+            if (tempSize > 30) {   
                 for (int chr = 0; chr < 27; ++chr) cout << currentTasks[i].getTitle()[chr];
                 cout << "...";
                 tempSize = 30;
             }
             else cout << setw(currentTasks[i].getTitle().size()) << currentTasks[i].getTitle();
-             cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[currentTasks[i].getPriority()].size()) << strPriority[currentTasks[i].getPriority()]
+            cout << setw(4 + (30 - tempSize)) << "| " << setw(strPriority[currentTasks[i].getPriority()].size()) << strPriority[currentTasks[i].getPriority()]
              << setw(4 + (13 - strPriority[currentTasks[i].getPriority()].size())) << "| " << setw(10) << currentTasks[i].getScheduledTime().getDate() 
              << setw(8) << "| " << setw(10) << currentTasks[i].getDeadline().getDate()
              << setw(4) << "| ";
             tempSize = currentTasks[i].getNote().size();
             if (tempSize > 30) {
-                for (int chr = 0; chr < 28; ++chr) cout << currentTasks[i].getNote()[chr]; cout << "... |\n";
-                
+                for (int chr = 0; chr < 28; ++chr) cout << currentTasks[i].getNote()[chr]; cout << "... |\n";    
             }
             else
             cout << setw(currentTasks[i].getNote().size()) << currentTasks[i].getNote() << setw(4 + 30 - currentTasks[i].getNote().size()) << "|\n";
@@ -505,6 +518,7 @@ void filter() {
                  << "3. Add filter by deadline\n"
                  << "4. Add filter by title\n"
                  << "5. Select task\n"
+                 << "6. Write to .txt\n"
                  << "0. Exit (clear all filters and exit) \n";
             cout << "Selection: "; cin >> k;
             switch (k)
@@ -536,6 +550,9 @@ void filter() {
             case 5:
                 selectTask2(title, status, priority, deadline);
                 break;
+            case 6:
+                writeToTxt_Filter();
+                break;
             case 0:
                 first = true;
                 currentTasks.clear();
@@ -551,7 +568,6 @@ void filter() {
     }
 }
 
-// truoc khi dung phai result.clear()
 void filterWith3Conditions(int priority, int status, Date deadline) {
     int l = 0, r = a[priority][status][deadline.day][deadline.month].size()-1, mid, best = a[priority][status][deadline.day][deadline.month].size() - 1;
     while (l <= r) {
@@ -561,7 +577,9 @@ void filterWith3Conditions(int priority, int status, Date deadline) {
             if (mid < best) best = mid;
             r = mid - 1;
         }
-        else if (deadline.year < a[priority][status][deadline.day][deadline.month][mid].getDeadline().year) r = mid - 1;
+        else 
+            if (deadline.year < a[priority][status][deadline.day][deadline.month][mid].getDeadline().year) 
+                r = mid - 1;
         else l = mid + 1;
     }
     while (a[priority][status][deadline.day][deadline.month][best].getDeadline().year == deadline.year && best < a[priority][status][deadline.day][deadline.month].size()) {
